@@ -1,9 +1,12 @@
 package com.example.week3session1contactapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -89,6 +92,10 @@ fun MyApp(viewModel: ContactViewModel) {
         mutableStateOf("")
     }
 
+    val updateActivityLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+        viewModel.getAllContacts()
+    }
+
     Column {
         SearchBox(searchValue, {
             searchValue = it
@@ -96,6 +103,10 @@ fun MyApp(viewModel: ContactViewModel) {
         })
         ContactListLC(listOfContact, { contactToBeDeleted ->
             viewModel.deleteContact(contactToBeDeleted)
+        }, {
+            val intent = Intent(context, UpdateActivity::class.java)
+            intent.putExtra("id", it.id)
+            updateActivityLauncher.launch(intent)
         })
     }
     FabAddContact(viewModel)
@@ -248,7 +259,7 @@ fun FabAddContact(viewModel: ContactViewModel) {
 }
 
 @Composable
-fun ContactListLC(listOfContacts: List<Contact>, onPerformDelete:(Contact) -> Unit) {
+fun ContactListLC(listOfContacts: List<Contact>, onPerformDelete:(Contact) -> Unit, onContactClicked:(Contact) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -256,16 +267,20 @@ fun ContactListLC(listOfContacts: List<Contact>, onPerformDelete:(Contact) -> Un
     ) {
         items(listOfContacts) {
             val currentContact = it
-            SingleContactUi(currentContact, {onPerformDelete(currentContact)})
+            SingleContactUi(currentContact, {onPerformDelete(currentContact)}, {onContactClicked(currentContact)})
         }
     }
 }
 
 @Composable
-fun SingleContactUi(contact: Contact, performDelete:() -> Unit) {
+fun SingleContactUi(contact: Contact, performDelete:() -> Unit, onContactClicked: () -> Unit) {
     Spacer(modifier = Modifier.height(12.dp))
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onContactClicked()
+            },
         contentAlignment = Alignment.CenterEnd
     ) {
         Row(

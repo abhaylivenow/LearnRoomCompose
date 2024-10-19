@@ -13,4 +13,6 @@ class ContactRepository(
     suspend fun searchContact(keyword: String) = contactDao.searchContact(keyword)
 
     suspend fun deleteContact(contact: Contact) = contactDao.deleteContact(contact)
+
+    suspend fun updateContact(contact: Contact) = contactDao.updateContact(contact)
 }

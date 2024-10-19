@@ -45,6 +45,12 @@ class ContactViewModel(
             getAllContacts()
         }
     }
+
+    fun updateContact(contact: Contact) {
+        viewModelScope.launch(Dispatchers.IO) {
+            contactRepository.updateContact(contact)
+        }
+    }
 }
 
 
